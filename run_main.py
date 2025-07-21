@@ -26,11 +26,11 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error,
 def list_of_ints(arg):
 	return list(map(int, arg.split(',')))
 os.environ["CUDA_VISIBLE_DEVICES"] = '0' #Add this
-os.environ["ACCELERATE_DISABLE_RICH"] = "1"  # Disable progress bars that might cause issues
+#os.environ["ACCELERATE_DISABLE_RICH"] = "1"  # Disable progress bars that might cause issues
 
 # Add this critical environment variable to prevent distributed init
 os.environ["ACCELERATE_USE_DEEPSPEED"] = "0"
-
+os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 
@@ -153,8 +153,7 @@ if torch.cuda.is_available():
 else:
 	device = torch.device("cpu")
 	#accelerator.print("Warning: Using CPU!")
-
-model = model.to(device)	
+	
 accelerator.print(args.__dict__)
 for ii in range(args.itr):
     # setting record of experiments
@@ -215,7 +214,7 @@ for ii in range(args.itr):
         model = CPTransformer.Model(args).float()
     else:
         raise Exception(f'The {args.model} is not an implemented baseline!')
-        
+    model = model.to(device)
     
     path = os.path.join(args.checkpoints,
                         setting + '-' + args.model_comment)  # unique checkpoint saving path
