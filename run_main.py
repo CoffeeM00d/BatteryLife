@@ -144,7 +144,7 @@ accelerator = Accelerator(
 	cpu=False,  # Force GPU usage
 	mixed_precision='no',  # Disable AMP if not needed
 	log_with="wandb",  # If using wandb
-	project_dir=os.path.join(args.checkpoints, "logs")  # For logging #Add this
+	project_dir=os.path.join(args.checkpoints, "logs") )  # For logging #Add this
 device = accelerator.device
 if torch.cuda.is_available():
 	torch.cuda.set_device(0) #Add this
