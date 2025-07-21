@@ -152,7 +152,7 @@ if torch.cuda.is_available():
 	torch.cuda.set_device(0) #Add this
 else:
 	device = torch.device("cpu")
-    	accelerator.print("Warning: Using CPU!")
+	#accelerator.print("Warning: Using CPU!")
 
 model = model.to(device)	
 accelerator.print(args.__dict__)
