@@ -31,6 +31,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0' #Add this
 # Add this critical environment variable to prevent distributed init
 os.environ["ACCELERATE_USE_DEEPSPEED"] = "0"
 os.environ["ACCELERATE_MIXED_PRECISION"] = "no"
+os.environ["ACCELERATE_CONFIG"] = "force_single_gpu"
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 
@@ -141,7 +142,7 @@ set_seed(args.seed)
 #ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 #deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2_baseline.json')
 #accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=args.accumulation_steps)
-accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps, mixed_precision='fp16' if args.use_amp else 'no')  # For logging #Add this
+accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps, mixed_precision='fp16' if args.use_amp else 'no', device_placement=False, kwargs_handlers=[{"find_unused_parameters": False,"num_processes": 1}])  
 device = accelerator.device
 if torch.cuda.is_available():
 	device = torch.device("cuda:0")
