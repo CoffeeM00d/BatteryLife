@@ -224,7 +224,7 @@ for ii in range(args.itr):
     joblib.dump(life_class_scaler, f'{path}/life_class_scaler')
     with open(path+'/args.json', 'w') as f:
         json.dump(args.__dict__, f)
-    if True #accelerator.is_local_main_process: #change to accelerator.is_local_main_process for multiple GPU
+    if True: #accelerator.is_local_main_process: #change to accelerator.is_local_main_process for multiple GPU
         wandb.init(
         # set the wandb project where this run will be logged
         project="new_LifeBaseline",
