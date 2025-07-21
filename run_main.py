@@ -25,12 +25,14 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error,
 
 def list_of_ints(arg):
 	return list(map(int, arg.split(',')))
-os.environ["CUDA_VISIBLE_DEVICES"] = '0' 
+os.environ["CUDA_VISIBLE_DEVICES"] = '0' #Add this
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 
 from utils.tools import del_files, EarlyStopping, adjust_learning_rate, vali_baseline, load_content
 parser = argparse.ArgumentParser(description='BatteryLife')
+
+torch.cuda.set_device(0) #Add this
 
 def set_seed(seed):
     accelerate.utils.set_seed(seed)
@@ -135,7 +137,8 @@ nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 set_seed(args.seed)
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2_baseline.json')
-accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=args.accumulation_steps)
+#accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=args.accumulation_steps)
+accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps) #Add this
 accelerator.print(args.__dict__)
 for ii in range(args.itr):
     # setting record of experiments
@@ -216,12 +219,12 @@ for ii in range(args.itr):
         accelerator.print(f'success delete {path}')
 
     os.makedirs(path, exist_ok=True)
-    accelerator.wait_for_everyone()
+    #accelerator.wait_for_everyone() #Comment this for 1 GPU
     joblib.dump(label_scaler, f'{path}/label_scaler')
     joblib.dump(life_class_scaler, f'{path}/life_class_scaler')
     with open(path+'/args.json', 'w') as f:
         json.dump(args.__dict__, f)
-    if accelerator.is_local_main_process:
+    if True #accelerator.is_local_main_process: #change to accelerator.is_local_main_process for multiple GPU
         wandb.init(
         # set the wandb project where this run will be logged
         project="new_LifeBaseline",
