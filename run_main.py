@@ -25,6 +25,7 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error,
 
 def list_of_ints(arg):
 	return list(map(int, arg.split(',')))
+os.environ["CUDA_VISIBLE_DEVICES"] = '0' 
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 
