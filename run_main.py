@@ -141,20 +141,24 @@ set_seed(args.seed)
 #ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 #deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2_baseline.json')
 #accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=args.accumulation_steps)
-accelerator = Accelerator(
-	gradient_accumulation_steps=args.accumulation_steps,
-	cpu=False,  # Force GPU usage
-	mixed_precision='no' if not args.use_amp else 'fp16'  # Disable AMP if not needed
-)  # For logging #Add this
-#device = accelerator.device
+accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps, mixed_precision='fp16' if args.use_amp else 'no')  # For logging #Add this
+device = accelerator.device
 if torch.cuda.is_available():
 	device = torch.device("cuda:0")
-	torch.cuda.set_device(0) #Add this
+	#torch.cuda.set_device(0) #Add this
 else:
 	device = torch.device("cpu")
 	#accelerator.print("Warning: Using CPU!")
 	
 accelerator.print(args.__dict__)
+# WandB initialization only on main process
+if accelerator.is_local_main_process:
+    wandb.init(
+        project="new_LifeBaseline",
+        config=args.__dict__,
+        name=nowtime
+    )
+
 for ii in range(args.itr):
     # setting record of experiments
     setting = '{}_sl{}_lr{}_dm{}_nh{}_el{}_dl{}_df{}_lradj{}_dataset{}_loss{}_wd{}_wl{}_bs{}_s{}'.format(
@@ -444,7 +448,8 @@ accelerator.print(f'Best model performance: Test Seen 15%-accuracy: {best_seen_t
 accelerator.print(f'Best model performance: Test Seen 10%-accuracy: {best_seen_test_alpha_acc2:.4f} | Test Unseen 10%-accuracy: {best_unseen_test_alpha_acc2:.4f}')
 accelerator.print(path)
 accelerator.set_trigger()
-if accelerator.check_trigger() and accelerator.is_local_main_process:
-    wandb.log({"epoch": epoch+1, "train_loss": train_loss, "vali_RMSE": best_vali_RMSE, "vali_MAPE": best_vali_MAPE, "vali_acc1": best_vali_alpha_acc1, "vali_acc2": best_vali_alpha_acc2, 
-               "test_RMSE": best_test_RMSE, "test_MAPE":best_test_MAPE, "test_acc1": best_test_alpha_acc1, "test_acc2": best_test_alpha_acc2})
+#if accelerator.check_trigger() and accelerator.is_local_main_process:
+if accelerator.is_local_main_process:
+    #wandb.log({"epoch": epoch+1, "train_loss": train_loss, "vali_RMSE": best_vali_RMSE, "vali_MAPE": best_vali_MAPE, "vali_acc1": best_vali_alpha_acc1, "vali_acc2": best_vali_alpha_acc2, 
+    #           "test_RMSE": best_test_RMSE, "test_MAPE":best_test_MAPE, "test_acc1": best_test_alpha_acc1, "test_acc2": best_test_alpha_acc2})
     wandb.finish()
