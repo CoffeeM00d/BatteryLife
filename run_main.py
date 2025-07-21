@@ -26,9 +26,11 @@ from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error,
 def list_of_ints(arg):
 	return list(map(int, arg.split(',')))
 os.environ["CUDA_VISIBLE_DEVICES"] = '0' #Add this
-os.environ["ACCELERATE_USE_CPU"] = "False"  # Explicitly disable CPU fallback
-os.environ["MASTER_ADDR"] = "localhost"
-os.environ["MASTER_PORT"] = "29500" 
+os.environ["ACCELERATE_DISABLE_RICH"] = "1"  # Disable progress bars that might cause issues
+
+# Add this critical environment variable to prevent distributed init
+os.environ["ACCELERATE_USE_DEEPSPEED"] = "0"
+
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # os.environ["CUDA_VISIBLE_DEVICES"] = '4,5,6,7'
 
@@ -142,13 +144,17 @@ set_seed(args.seed)
 accelerator = Accelerator(
 	gradient_accumulation_steps=args.accumulation_steps,
 	cpu=False,  # Force GPU usage
-	mixed_precision='no',  # Disable AMP if not needed
-	log_with="wandb",  # If using wandb
-	project_dir=os.path.join(args.checkpoints, "logs") )  # For logging #Add this
-device = accelerator.device
+	mixed_precision='no' if not args.use_amp else 'fp16'  # Disable AMP if not needed
+)  # For logging #Add this
+#device = accelerator.device
 if torch.cuda.is_available():
+	device = torch.device("cuda:0")
 	torch.cuda.set_device(0) #Add this
-	
+else:
+	device = torch.device("cpu")
+    accelerator.print("Warning: Using CPU!")
+
+model = model.to(device)	
 accelerator.print(args.__dict__)
 for ii in range(args.itr):
     # setting record of experiments
