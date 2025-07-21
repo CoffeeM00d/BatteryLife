@@ -214,7 +214,8 @@ for ii in range(args.itr):
         model = CPTransformer.Model(args).float()
     else:
         raise Exception(f'The {args.model} is not an implemented baseline!')
-    model = model.to(device)
+	    
+    model = model.to(device) #Add this
     
     path = os.path.join(args.checkpoints,
                         setting + '-' + args.model_comment)  # unique checkpoint saving path
