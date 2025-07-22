@@ -142,7 +142,7 @@ set_seed(args.seed)
 #ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 #deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2_baseline.json')
 #accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=args.accumulation_steps)
-accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps, mixed_precision='fp16' if args.use_amp else 'no', device_placement=False, kwargs_handlers=[{"find_unused_parameters": False,"num_processes": 1}])  
+accelerator = Accelerator(gradient_accumulation_steps=args.accumulation_steps, mixed_precision='fp16' if args.use_amp else 'no')
 device = accelerator.device
 if torch.cuda.is_available():
 	device = torch.device("cuda:0")
