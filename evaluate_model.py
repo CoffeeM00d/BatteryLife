@@ -181,7 +181,7 @@ deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2_baseline.json
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 
 # load from the saved path
-alpha = args.alpha
+alpha = args.alpha1
 alpha2 = args.alpha2
 args_path = args.args_path
 args_json = json.load(open(f'{args_path}args.json'))
